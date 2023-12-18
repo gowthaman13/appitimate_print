@@ -1,0 +1,164 @@
+{
+   "action":"RECEIPT-PRINT",
+   "data":{
+      "department":{
+         "id":1,
+         "name":"Restaurant",
+         "barcode_department_name":"MSP",
+         "business_model":null,
+         "description":null,
+         "department_type":null,
+         "code":"Magna",
+         "contact":null,
+         "address":null,
+         "email":"restaurant@gmail.com",
+         "shop_msg":null,
+         "thank_msg":"Thank you. Come Again Please.",
+         "more_info":null,
+         "latitude":"9.667795",
+         "longitude":"80.027492",
+         "created_at":null,
+         "updated_at":"2023-03-28 17:59:16",
+         "deleted_at":null,
+         "logo":"https://restaurant.apptimate.lk//images/users/users-logo-1679986756.jpg",
+         "smsUrl":null,
+         "voucher_receipt_thanks_msg":null,
+         "voucher_notice_msg":null,
+         "slogan":null
+      },
+      "bill_no":"I000053",
+      "date":"2023-12-08",
+      "time":"10:29:47",
+      "cashier":"Admin Admin",
+      "gross_total":6526,
+      "total_discount":0,
+      "total_paid":"6526.00",
+      "company_logo":"https://restaurant.apptimate.lk/images/apptimus.png",
+      "customer":{
+         "name":"Vithushan",
+         "code":"Magna100000"
+      },
+      "products":[
+         {
+            "unit_name":null,
+            "name_in_tamil":null,
+            "id":2,
+            "code":"BBC0002",
+            "label":"Biriyani | BBC0002",
+            "attributes":null,
+            "packageProducts":[
+               
+            ],
+            "unit_price":"148.00",
+            "qty":"2.00",
+            "discount":"0.00",
+            "total":"296.0000"
+         },
+         {
+            "unit_name":null,
+            "name_in_tamil":"",
+            "id":7,
+            "code":"BBC0007",
+            "label":"200ml PANDA Baby cologne | BBC0007",
+            "attributes":null,
+            "packageProducts":[
+               
+            ],
+            "unit_price":"475.00",
+            "qty":"2.00",
+            "discount":"0.00",
+            "total":"950.0000"
+         },
+         {
+            "unit_name":null,
+            "name_in_tamil":"",
+            "id":5,
+            "code":"BBC0008",
+            "label":"50ml SWADESHI KHOMBA Baby cologne herbal | BBC0008",
+            "attributes":null,
+            "packageProducts":[
+               
+            ],
+            "unit_price":"170.00",
+            "qty":"2.00",
+            "discount":"0.00",
+            "total":"340.0000"
+         },
+         {
+            "unit_name":null,
+            "name_in_tamil":"",
+            "id":27,
+            "code":"BDI0020",
+            "label":"24 pcs BABY CHERAMY Large-9-14 kg | BDI0020",
+            "attributes":null,
+            "packageProducts":[
+               
+            ],
+            "unit_price":"1220.00",
+            "qty":"1.00",
+            "discount":"0.00",
+            "total":"1220.0000"
+         },
+         {
+            "unit_name":null,
+            "name_in_tamil":"",
+            "id":31,
+            "code":"BDI0027",
+            "label":"4 Diapers BAMBI Premium care diaper S up to 7kg | BDI0027",
+            "attributes":null,
+            "packageProducts":[
+               
+            ],
+            "unit_price":"190.00",
+            "qty":"2.00",
+            "discount":"0.00",
+            "total":"380.0000"
+         },
+         {
+            "unit_name":null,
+            "name_in_tamil":"",
+            "id":30,
+            "code":"BDI0045",
+            "label":"24 pcs BABY CHERAMY Medium-4-8 kg | BDI0045",
+            "attributes":null,
+            "packageProducts":[
+               
+            ],
+            "unit_price":"1220.00",
+            "qty":"1.00",
+            "discount":"0.00",
+            "total":"1220.0000"
+         },
+         {
+            "unit_name":null,
+            "name_in_tamil":null,
+            "id":24,
+            "code":"SDI0008",
+            "label":"10 pcs adfit adult diapers medium-78-110cm hip | SDI0008",
+            "attributes":null,
+            "packageProducts":[
+               
+            ],
+            "unit_price":"1090.00",
+            "qty":"1.00",
+            "discount":"0.00",
+            "total":"1090.0000"
+         },
+         {
+            "unit_name":null,
+            "name_in_tamil":null,
+            "id":26,
+            "code":"SDI0010",
+            "label":"8 pcs adfit adult diapers l-88-121cm hip | SDI0010",
+            "attributes":null,
+            "packageProducts":[
+               
+            ],
+            "unit_price":"1030.00",
+            "qty":"1.00",
+            "discount":"0.00",
+            "total":"1030.0000"
+         }
+      ]
+   }
+}
