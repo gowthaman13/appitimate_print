@@ -100,18 +100,31 @@ class _HomeScreenState extends State<HomeScreen> {
     bytes += generator.text('------------------------------------------',
         styles: PosStyles(align: PosAlign.center));
     bytes += generator.text(
-        genPrintRow1('Bill No: ${printDetail.data.billNo}',
+        genPrintRow2('Bill No: ${printDetail.data.billNo}',
             'Date: ${printDetail.data.date}', 1),
         styles: PosStyles(bold: true));
     bytes += generator.text(
-        genPrintRow1('Cashier: ${printDetail.data.cashier}',
+        genPrintRow2('Cashier: ${printDetail.data.cashier}',
             'Time: ${printDetail.data.time}', 1),
         styles: PosStyles(bold: true));
+
+    if (printDetail.data.customer.name != "" &&
+        printDetail.data.customer.name != 'null') {
+      bytes += generator.text('------------------------------------------',
+          styles: PosStyles(
+            align: PosAlign.center,
+          ));
+      bytes += generator.text(
+          genPrintRow1('Customer: ${printDetail.data.customer.name}',
+              'Code: ${printDetail.data.customer.code}', 1),
+          styles: PosStyles(bold: true));
+    }
 
     bytes += generator.text('------------------------------------------',
         styles: PosStyles(
           align: PosAlign.center,
         ));
+
     bytes += generator.text(
         genPrintRow(
             col1: 'NO',
@@ -119,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
             col3: 'PRICE',
             col4: 'DISCOUNT',
             col5: 'TOTAL'),
-        styles: PosStyles(align: PosAlign.center, bold: true));
+        styles: PosStyles(align: PosAlign.left, bold: true));
 
     bytes += generator.text('------------------------------------------',
         styles: PosStyles(align: PosAlign.center, bold: true));
@@ -132,12 +145,14 @@ class _HomeScreenState extends State<HomeScreen> {
       //     styles: PosStyles(align: PosAlign.left));
       bytes += generator.text(genPrintRow(col1: '$i', col2: '${item.label}'),
           styles: PosStyles(align: PosAlign.left));
-      bytes += generator.text(genPrintRow(
-          col1: '',
-          col2: '${item.qty}',
-          col3: '${item.unitPrice}',
-          col4: '${item.discount}',
-          col5: '${item.total}'));
+      bytes += generator.text(
+          genPrintRow(
+              col1: '',
+              col2: '${item.qty}',
+              col3: '${item.unitPrice}',
+              col4: '${item.discount}',
+              col5: '${item.total}'),
+          styles: PosStyles(align: PosAlign.left));
       i++;
     }
 
@@ -146,16 +161,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //net total
     bytes += generator.text(
-        genPrintRow2('Net Total', '${printDetail.data.grossTotal}', 1),
+        genPrintRow2('Net Total', '${printDetail.data.grossTotal}.00', 1),
         styles: PosStyles(bold: true));
     // Total
     bytes += generator.text(
-        genPrintRow2('Total', '${printDetail.data.totalPaid}', 1),
+        genPrintRow2('Received Amount', '${printDetail.data.totalPaid}', 1),
         styles: PosStyles(bold: true));
 
+    final balance =
+        double.parse(printDetail.data.totalPaid) - printDetail.data.grossTotal;
     //balance
-    bytes += generator.text(
-        genPrintRow2('Balance', '${printDetail.data.totalPaid}', 1),
+    bytes += generator.text(genPrintRow2('Balance', '${balance}0', 1),
         styles: PosStyles(bold: true));
 
     bytes += generator.text('------------------------------------------',
