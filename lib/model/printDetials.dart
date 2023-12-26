@@ -205,8 +205,12 @@ class Data {
   String date;
   String time;
   String cashier;
-  int grossTotal;
-  int totalDiscount;
+  String total;
+  String totalDiscount;
+  String deliveryCharge;
+  String otherCharge;
+  String packageCharge;
+  String serviceCharge;
   String totalPaid;
   String companyLogo;
   Customer customer;
@@ -218,12 +222,16 @@ class Data {
     required this.date,
     required this.time,
     required this.cashier,
-    required this.grossTotal,
+    required this.total,
     required this.totalDiscount,
     required this.totalPaid,
     required this.companyLogo,
     required this.customer,
     required this.products,
+    required this.deliveryCharge,
+    required this.otherCharge,
+    required this.packageCharge,
+    required this.serviceCharge,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) {
@@ -233,8 +241,12 @@ class Data {
       date: json['date'] ?? '',
       time: json['time'] ?? '',
       cashier: json['cashier'] ?? '',
-      grossTotal: json['gross_total'] ?? 0,
-      totalDiscount: json['total_discount'] ?? 0,
+      total: json['total'] ?? '',
+      totalDiscount: json['total_discount'] ?? '',
+      deliveryCharge: json['delivery_charge'] ?? '',
+      otherCharge: json['other_charge'] ?? '',
+      packageCharge: json['package_charge'] ?? '',
+      serviceCharge: json['service_charge'] ?? '',
       totalPaid: json['total_paid'] ?? '',
       companyLogo: json['company_logo'] ?? '',
       customer: Customer.fromJson(json['customer'] ?? {}),

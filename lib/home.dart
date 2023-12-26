@@ -1,5 +1,4 @@
 // ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -10,7 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:epson_epos/epson_epos.dart';
-import 'package:esc_pos_utils/esc_pos_utils.dart';
+// import 'package:esc_pos_utils/esc_pos_utils.dart';
+import 'package:flutter_esc_pos_utils/flutter_esc_pos_utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 
@@ -33,23 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WebView.platform = AndroidWebView();
   }
-
-  // onDiscoveryTCP() async {
-  //   try {
-  //     List<EpsonPrinterModel>? data =
-  //         await EpsonEPOS.onDiscovery(type: EpsonEPOSPortType.TCP);
-  //     if (data != null && data.length > 0) {
-  //       data.forEach((element) {
-  //         print(element.toJson());
-  //       });
-  //       setState(() {
-  //         printers = data;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     log("Error: " + e.toString());
-  //   }
-  // }
 
   onDiscoveryUSB() async {
     try {
@@ -74,7 +57,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (response.statusCode == 200) {
       final List<int> bytes = response.bodyBytes;
-      return img.decodeImage(Uint8List.fromList(bytes))!;
+
+      // Decode the original image
+      img.Image originalImage = img.decodeImage(Uint8List.fromList(bytes))!;
+
+      // Resize the image to your desired width and height
+      int targetWidth = 400; // Set your desired width
+      int targetHeight = 400; // Set your desired height
+      img.Image resizedImage = img.copyResize(originalImage,
+          width: targetWidth, height: targetHeight);
+
+      return resizedImage;
     } else {
       throw Exception('Failed to load logo');
     }
@@ -85,102 +78,127 @@ class _HomeScreenState extends State<HomeScreen> {
     final generator =
         Generator(PaperSize.mm80, profile); // Using mm80 for wider paper size
     List<int> bytes = [];
-    final img.Image logoImage = await getLogoImage();
-    //logo
-    bytes += generator.image(logoImage, align: PosAlign.center);
-    //title
-    bytes += generator.text(title('Restaurant'),
-        styles: PosStyles(
-            align: PosAlign.center,
-            bold: true,
-            height: PosTextSize.size2,
-            width: PosTextSize.size2));
-    bytes += generator.feed(2);
+    if (printDetail.data.department.logo != "" &&
+        printDetail.data.department.logo.isNotEmpty) {
+      final img.Image logoImage = await getLogoImage();
+      //logo
+      bytes += generator.image(logoImage, align: PosAlign.center);
+    }
 
-    bytes += generator.text('------------------------------------------',
+    var cashier = printDetail.data.cashier.length > 15
+        ? '${printDetail.data.cashier.substring(0, 12)}..'
+        : printDetail.data.cashier;
+
+    var customer = printDetail.data.customer.name.length > 15
+        ? '${printDetail.data.customer.name.substring(0, 12)}..'
+        : printDetail.data.customer.name;
+
+    bytes += generator.text('${printDetail.data.department.address}');
+
+    bytes += generator.text('${printDetail.data.department.contact}',
+        styles: PosStyles(align: PosAlign.center));
+    bytes += generator.text('------------------------------------------------',
         styles: PosStyles(align: PosAlign.center));
     bytes += generator.text(
         genPrintRow2('Bill No: ${printDetail.data.billNo}',
             'Date: ${printDetail.data.date}', 1),
-        styles: PosStyles(bold: true));
+        styles: PosStyles(align: PosAlign.left));
     bytes += generator.text(
-        genPrintRow2('Cashier: ${printDetail.data.cashier}',
-            'Time: ${printDetail.data.time}', 1),
-        styles: PosStyles(bold: true));
+        genPrintRow2('Cashier: $cashier', 'Time: ${printDetail.data.time}', 1),
+        styles: PosStyles(align: PosAlign.left));
 
     if (printDetail.data.customer.name != "" &&
         printDetail.data.customer.name != 'null') {
-      bytes += generator.text('------------------------------------------',
-          styles: PosStyles(
-            align: PosAlign.center,
-          ));
       bytes += generator.text(
-          genPrintRow1('Customer: ${printDetail.data.customer.name}',
-              'Code: ${printDetail.data.customer.code}', 1),
-          styles: PosStyles(bold: true));
+        genPrintRow2('Customer: $customer',
+            'Code: ${printDetail.data.customer.code}', 1),
+      );
     }
 
-    bytes += generator.text('------------------------------------------',
+    bytes += generator.text('------------------------------------------------',
         styles: PosStyles(
           align: PosAlign.center,
         ));
 
     bytes += generator.text(
-        genPrintRow(
-            col1: 'NO',
-            col2: 'QTY',
-            col3: 'PRICE',
-            col4: 'DISCOUNT',
-            col5: 'TOTAL'),
+        genPrintRow('NO', 'QTY', 'PRICE', 'DISCOUNT', 'TOTAL', 1),
         styles: PosStyles(align: PosAlign.left, bold: true));
 
-    bytes += generator.text('------------------------------------------',
-        styles: PosStyles(align: PosAlign.center, bold: true));
+    bytes += generator.text('------------------------------------------------',
+        styles: PosStyles(align: PosAlign.left, bold: true));
 
     final items = printDetail.data.products;
     int i = 1;
 
     for (var item in items) {
-      // bytes += generator.text('${item.label}               ${item.total}',
-      //     styles: PosStyles(align: PosAlign.left));
-      bytes += generator.text(genPrintRow(col1: '$i', col2: '${item.label}'),
-          styles: PosStyles(align: PosAlign.left));
+      var truncatedLabel = item.label.length > 40
+          ? '${item.label.substring(0, 40)}..'
+          : item.label;
+
+      bytes += generator.text(genPrintRow1('$i $truncatedLabel'));
       bytes += generator.text(
-          genPrintRow(
-              col1: '',
-              col2: '${item.qty}',
-              col3: '${item.unitPrice}',
-              col4: '${item.discount}',
-              col5: '${item.total}'),
+          genPrintRow('', '${item.qty}', '${item.unitPrice}',
+              '${item.discount}', '${item.total}', 1),
           styles: PosStyles(align: PosAlign.left));
       i++;
     }
 
-    bytes += generator.text('------------------------------------------',
-        styles: PosStyles(align: PosAlign.center));
+    bytes += generator.text('------------------------------------------------',
+        styles: PosStyles(align: PosAlign.left));
 
     //net total
-    bytes += generator.text(
-        genPrintRow2('Net Total', '${printDetail.data.grossTotal}.00', 1),
-        styles: PosStyles(bold: true));
+    // bytes += generator.text(
+    //     genPrintRow2('Gross Total', '${printDetail.data.grossTotal}.00', 1),
+    //     styles: PosStyles(bold: true));
+    // bytes += generator.text(
+    //     genPrintRow2("Total Discount", '${printDetail.data.totalDiscount}', 1));
     // Total
+    if (printDetail.data.serviceCharge != '0.00' &&
+        printDetail.data.serviceCharge != '')
+      bytes += generator.text(genPrintRow2(
+          "Service Charges", '${printDetail.data.serviceCharge}', 1));
+    if (printDetail.data.deliveryCharge != '0.00' &&
+        printDetail.data.deliveryCharge != '')
+      bytes += generator.text(genPrintRow2(
+          "Delivery Charges", '${printDetail.data.deliveryCharge}', 1));
+    if (printDetail.data.packageCharge != '0.00' &&
+        printDetail.data.packageCharge != '')
+      bytes += generator.text(genPrintRow2(
+          "Package Charges", '${printDetail.data.packageCharge}', 1));
+
+    if (printDetail.data.otherCharge != '0.00' &&
+        printDetail.data.otherCharge != '')
+      bytes += generator.text(
+          genPrintRow2("Other Charges", '${printDetail.data.otherCharge}', 1));
+
     bytes += generator.text(
-        genPrintRow2('Received Amount', '${printDetail.data.totalPaid}', 1),
+        genPrintRow2('Net Total', '${printDetail.data.total}', 1),
         styles: PosStyles(bold: true));
+    bytes += generator.text(
+        genPrintRow2('Received Amount', '${printDetail.data.totalPaid}', 1));
 
-    final balance =
-        double.parse(printDetail.data.totalPaid) - printDetail.data.grossTotal;
+    final balance = double.parse(printDetail.data.totalPaid) -
+        double.parse(printDetail.data.total);
     //balance
-    bytes += generator.text(genPrintRow2('Balance', '${balance}0', 1),
-        styles: PosStyles(bold: true));
+    bytes += generator.text(genPrintRow2('Balance', '${balance}0', 1));
 
-    bytes += generator.text('------------------------------------------',
+    if (double.parse(printDetail.data.totalDiscount) > 0.00) {
+      bytes += generator.text(
+          '------------------------------------------------',
+          styles: PosStyles(align: PosAlign.left, bold: true));
+      bytes += generator.text(
+          genPrintRow2(
+              "* Total Discount:", '${printDetail.data.totalDiscount}', 2),
+          styles: PosStyles(align: PosAlign.center, bold: true));
+    }
+
+    bytes += generator.text('------------------------------------------------',
         styles: PosStyles(align: PosAlign.center, bold: true));
 
     // Thank you message
     bytes += generator.text(
-        'Thank you. Come Agian Please.\nPowered by Apptimate',
-        styles: PosStyles(align: PosAlign.center, bold: true));
+        '${printDetail.data.department.thankMsg}\nPowered by Apptimate',
+        styles: PosStyles(align: PosAlign.center));
 
     // Feed and cut
     // bytes += generator.feed(2);
@@ -189,62 +207,88 @@ class _HomeScreenState extends State<HomeScreen> {
     return bytes;
   }
 
+  Future<img.Image> textToImage(String text) async {
+    // Create an image with a white background
+    img.Image image = img.Image(200, 50);
+    image.fill(img.getColor(255, 255, 255));
+
+    // Draw the text on the image
+    img.drawString(image, img.arial_24, 20, 10, text);
+
+    return image;
+  }
+
   void onPrintTest(EpsonPrinterModel printer) async {
-    EpsonEPOSCommand command = EpsonEPOSCommand();
-    List<Map<String, dynamic>> commands = [];
-    commands.add(command.addTextAlign(EpsonEPOSTextAlign.LEFT));
-    commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
-    commands.add(command.addFeedLine(2));
-    commands.add(command.addCut(EpsonEPOSCut.CUT_FEED));
-    await EpsonEPOS.onPrint(printer, commands);
+    setState(() {
+      loader = true;
+    });
+
+    try {
+      EpsonEPOSCommand command = EpsonEPOSCommand();
+      List<Map<String, dynamic>> commands = [];
+
+      commands.add(command.addTextAlign(EpsonEPOSTextAlign.CENTER));
+      commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
+      commands.add(command.addFeedLine(2));
+      commands.add(command.addCut(EpsonEPOSCut.CUT_FEED));
+      await EpsonEPOS.onPrint(printer, commands);
+    } catch (e) {
+      log("Error printing: $e");
+    } finally {
+      setState(() {
+        loader = false; // Hide loader when printing is done
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: WebView(
-          initialUrl: 'https://restaurant.apptimate.lk',
-          javascriptMode: JavascriptMode.unrestricted,
-          onWebViewCreated: (WebViewController webViewController) {
-            _controller.complete(webViewController);
-          },
-          onProgress: (int progress) {
-            print('WebView is loading (progress : $progress%)');
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          javascriptChannels: Set.from([
-            JavascriptChannel(
-              name: 'Print',
-              onMessageReceived: (JavascriptMessage message) async {
-                final responseJson = message.message;
-                log(responseJson.toString());
-                if (responseJson.isEmpty) {
-                  return;
-                }
-                setState(() {
-                  printDetail = PrintDetail.fromJson(jsonDecode(responseJson));
-                });
-
-                await onDiscoveryUSB();
-                // final items = printDetail.data.products;
-                // items.forEach((element) {
-                //   print(element.label +
-                //       " " +
-                //       element.total +
-                //       " " +
-                //       element.qty.toString());
-                // });
-
-                if (printers.length != 0) {
-                  onPrintTest(printers[0]);
-                }
+        child: Stack(
+          children: [
+            WebView(
+              initialUrl: 'https://Sapiduponga.apptimate.lk',
+              javascriptMode: JavascriptMode.unrestricted,
+              onWebViewCreated: (WebViewController webViewController) {
+                _controller.complete(webViewController);
               },
+              onProgress: (int progress) {
+                print('WebView is loading (progress : $progress%)');
+              },
+              onPageStarted: (String url) {},
+              onPageFinished: (String url) {},
+              javascriptChannels: Set.from([
+                JavascriptChannel(
+                  name: 'Print',
+                  onMessageReceived: (JavascriptMessage message) async {
+                    final responseJson = message.message;
+                    log(responseJson.toString());
+                    if (responseJson.isEmpty) {
+                      return;
+                    }
+                    setState(() {
+                      printDetail = PrintDetail.fromJson(jsonDecode(
+                        responseJson,
+                      ));
+                    });
+
+                    await onDiscoveryUSB();
+
+                    if (printers.length != 0) {
+                      onPrintTest(printers[0]);
+                    }
+                  },
+                ),
+              ]),
+              gestureNavigationEnabled: true,
+              backgroundColor: const Color(0x00000000),
             ),
-          ]),
-          gestureNavigationEnabled: true,
-          backgroundColor: const Color(0x00000000),
+            if (loader)
+              Center(
+                child: CircularProgressIndicator(),
+              )
+          ],
         ),
       ),
     );
