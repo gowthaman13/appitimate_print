@@ -2,14 +2,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:typed_data';
 import 'package:epson_epos_example/model/constant.dart';
 import 'package:epson_epos_example/model/printDetials.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:epson_epos/epson_epos.dart';
-// import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter_esc_pos_utils/flutter_esc_pos_utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
@@ -146,13 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
     bytes += generator.text('------------------------------------------------',
         styles: PosStyles(align: PosAlign.left));
 
-    //net total
-    // bytes += generator.text(
-    //     genPrintRow2('Gross Total', '${printDetail.data.grossTotal}.00', 1),
-    //     styles: PosStyles(bold: true));
-    // bytes += generator.text(
-    //     genPrintRow2("Total Discount", '${printDetail.data.totalDiscount}', 1));
-    // Total
     if (printDetail.data.serviceCharge != '0.00' &&
         printDetail.data.serviceCharge != '')
       bytes += generator.text(genPrintRow2(
@@ -163,8 +154,10 @@ class _HomeScreenState extends State<HomeScreen> {
           "Delivery Charges", '${printDetail.data.deliveryCharge}', 1));
     if (printDetail.data.packageCharge != '0.00' &&
         printDetail.data.packageCharge != '')
-      bytes += generator.text(genPrintRow2(
-          "Package Charges", '${printDetail.data.packageCharge}', 1));
+      bytes += generator.text(
+          genPrintRow2(
+              "Package Charges", '${printDetail.data.packageCharge}', 1),
+          styles: PosStyles(fontType: PosFontType.fontA));
 
     if (printDetail.data.otherCharge != '0.00' &&
         printDetail.data.otherCharge != '')
